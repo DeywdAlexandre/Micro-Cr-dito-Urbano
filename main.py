@@ -6,6 +6,7 @@ from datetime import date
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'your_super_secret_key')
+app.config['SESSION_COOKIE_DOMAIN'] = os.environ.get('SESSION_COOKIE_DOMAIN')
 
 # Configuração da conexão com o banco de dados PostgreSQL
 def get_db_connection():
