@@ -1,3 +1,4 @@
+# ultima alteracao
 import os
 import hashlib
 import psycopg2
