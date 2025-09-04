@@ -24,6 +24,11 @@ def hash_password(password):
 # Rota para a página de login
 @app.route('/', methods=['GET', 'POST'])
 def login():
+    # Credenciais de acesso temporárias e hardcoded
+    # ATENÇÃO: ISSO NÃO É SEGURO PARA PRODUÇÃO. USE APENAS PARA TESTES.
+    USERNAME_PADRAO = "admin"
+    SENHA_PADRAO = "123456"
+    
     if 'username' in session:
         if session.get('role') == 'master':
             return redirect(url_for('admin_panel'))
@@ -31,43 +36,21 @@ def login():
             return redirect(url_for('dashboard'))
 
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        hashed_password = hash_password(password)
-
-        # DEBUG: Imprime o nome de usuário e a senha hasheada que a aplicação está usando
-        print(f"Tentando login para o usuário: {username}")
-        print(f"Senha hasheada: {hashed_password}")
-
-        conn = get_db_connection()
-        if conn is None:
-            flash('Erro ao conectar ao banco de dados. Verifique a variável de ambiente DATABASE_URL.', 'danger')
-            return redirect(url_for('login'))
+        username_digitado = request.form['username']
+        password_digitada = request.form['password']
+        
+        if username_digitado == USERNAME_PADRAO and password_digitada == SENHA_PADRAO:
+            # Dados do usuário padrão. Você pode ajustar a organização_id conforme a sua necessidade.
+            session['username'] = USERNAME_PADRAO
+            session['role'] = 'master'
+            session['organization_id'] = 1  # ID de uma organização existente no seu banco de dados
             
-        cur = conn.cursor()
-        cur.execute("SELECT id, username, role, organization_id FROM users WHERE username = %s AND password = %s", (username, hashed_password))
-        user = cur.fetchone()
-        cur.close()
-        conn.close()
-
-        if user:
-            # DEBUG: O login foi bem-sucedido.
-            print(f"Login bem-sucedido para o usuário: {username}")
-            session['username'] = user[1]
-            session['role'] = user[2]
-            session['organization_id'] = user[3]
-            
-            flash('Login bem-sucedido!', 'success')
-            if session.get('role') == 'master':
-                return redirect(url_for('admin_panel'))
-            else:
-                return redirect(url_for('dashboard'))
+            flash('Login bem-sucedido com credenciais temporárias!', 'success')
+            return redirect(url_for('dashboard'))
         else:
-            # DEBUG: O login falhou.
-            print(f"Login falhou para o usuário: {username}. Nome de usuário ou senha incorretos.")
-            flash('Nome de usuário ou senha incorretos. Tente novamente.', 'danger')
+            flash('Nome de usuário ou senha incorretos.', 'danger')
             return redirect(url_for('login'))
-
+            
     return render_template('login.html')
 
 # Rota para o painel de administrador (apenas para o usuário "master")
