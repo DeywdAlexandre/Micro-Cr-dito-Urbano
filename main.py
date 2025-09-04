@@ -5,8 +5,8 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from datetime import date
 
 # --- ADICIONE ESTAS DUAS LINHAS AQUI ---
-hashed_password_for_new_user = hashlib.sha256('Dwydats12'.encode()).hexdigest()
-print(f"O hash para a nova senha é: {hashed_password_for_new_user}")
+hashed_password_for_new_user = hashlib.sha256('dwydats12'.encode()).hexdigest()
+print(f"O hash para a nova senha é: {hash_da_senha}")
 # ----------------------------------------
 app = Flask(__name__)
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'your_super_secret_key')
