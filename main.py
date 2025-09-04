@@ -1,4 +1,3 @@
-# ultima alteracao
 import os
 import hashlib
 import psycopg2
@@ -35,17 +34,11 @@ def login():
         password = request.form['password']
         hashed_password = hash_password(password)
 
-        # DEBUG: Imprime o nome de usuário e a senha hasheada que a aplicação está usando
-        print(f"Tentando login para o usuário: {username}")
-        print(f"Senha hasheada: {hashed_password}")
-
         conn = get_db_connection()
         if conn is None:
-            # ERRO: Conexão com o banco de dados falhou
-            print("ERRO: Falha ao conectar ao banco de dados.")
-            flash('Erro ao conectar ao banco de dados. Tente novamente mais tarde.', 'danger')
+            flash('Erro ao conectar ao banco de dados. Verifique a variável de ambiente DATABASE_URL.', 'danger')
             return redirect(url_for('login'))
-
+            
         cur = conn.cursor()
         cur.execute("SELECT id, username, role, organization_id FROM users WHERE username = %s AND password = %s", (username, hashed_password))
         user = cur.fetchone()
@@ -53,8 +46,6 @@ def login():
         conn.close()
 
         if user:
-            # DEBUG: O login foi bem-sucedido.
-            print(f"Login bem-sucedido para o usuário: {username}")
             session['username'] = user[1]
             session['role'] = user[2]
             session['organization_id'] = user[3]
@@ -65,9 +56,7 @@ def login():
             else:
                 return redirect(url_for('dashboard'))
         else:
-            # DEBUG: O login falhou.
-            print(f"Login falhou para o usuário: {username}. Nome de usuário ou senha incorretoss.")
-            flash('Nome de usuário ou senha incorretos.', 'danger')
+            flash('Nome de usuário ou senha incorretos. Tente novamente.', 'danger')
             return redirect(url_for('login'))
 
     return render_template('login.html')
@@ -76,6 +65,7 @@ def login():
 @app.route('/admin_panel')
 def admin_panel():
     if 'username' not in session or session.get('role') != 'master':
+        flash('Acesso negado. Apenas usuários master podem acessar o painel de administração.', 'danger')
         return redirect(url_for('login'))
 
     conn = get_db_connection()
@@ -94,7 +84,7 @@ def admin_panel():
 @app.route('/add_user', methods=['POST'])
 def add_user():
     if 'username' not in session or session.get('role') != 'master':
-        flash('Acesso negado.', 'danger')
+        flash('Acesso negado. Apenas usuários master podem adicionar novos usuários.', 'danger')
         return redirect(url_for('login'))
 
     username = request.form['username']
@@ -104,6 +94,7 @@ def add_user():
 
     conn = get_db_connection()
     if conn is None:
+        flash('Erro ao conectar ao banco de dados. Tente novamente mais tarde.', 'danger')
         return "Erro ao conectar ao banco de dados.", 500
         
     try:
@@ -123,7 +114,7 @@ def add_user():
     except Exception as e:
         conn.rollback()
         print(f"Erro ao adicionar usuário: {e}")
-        flash(f'Erro ao adicionar usuário: {e}', 'danger')
+        flash(f'Erro ao adicionar usuário: {e}. Verifique se o nome de usuário já existe.', 'danger')
         conn.close()
 
     return redirect(url_for('admin_panel'))
@@ -187,6 +178,7 @@ def add_client():
 
     conn = get_db_connection()
     if conn is None:
+        flash('Erro ao conectar ao banco de dados. Tente novamente mais tarde.', 'danger')
         return "Erro ao conectar ao banco de dados.", 500
         
     try:
@@ -199,8 +191,7 @@ def add_client():
         flash('Cliente adicionado com sucesso!', 'success')
     except Exception as e:
         conn.rollback()
-        print(f"Erro ao adicionar cliente: {e}")
-        flash(f'Erro ao adicionar cliente: {e}', 'danger')
+        flash(f'Erro ao adicionar cliente: {e}. Verifique os dados.', 'danger')
         conn.close()
 
     return redirect(url_for('clients'))
@@ -249,6 +240,7 @@ def add_loan():
 
     conn = get_db_connection()
     if conn is None:
+        flash('Erro ao conectar ao banco de dados. Tente novamente mais tarde.', 'danger')
         return "Erro ao conectar ao banco de dados.", 500
 
     try:
@@ -261,8 +253,7 @@ def add_loan():
         flash('Empréstimo adicionado com sucesso!', 'success')
     except Exception as e:
         conn.rollback()
-        print(f"Erro ao adicionar empréstimo: {e}")
-        flash(f'Erro ao adicionar empréstimo: {e}', 'danger')
+        flash(f'Erro ao adicionar empréstimo: {e}. Verifique os dados.', 'danger')
         conn.close()
 
     return redirect(url_for('loans'))
@@ -306,6 +297,7 @@ def add_payment():
 
     conn = get_db_connection()
     if conn is None:
+        flash('Erro ao conectar ao banco de dados. Tente novamente mais tarde.', 'danger')
         return "Erro ao conectar ao banco de dados.", 500
     
     try:
@@ -318,8 +310,7 @@ def add_payment():
         flash('Pagamento adicionado com sucesso!', 'success')
     except Exception as e:
         conn.rollback()
-        print(f"Erro ao adicionar pagamento: {e}")
-        flash(f'Erro ao adicionar pagamento: {e}', 'danger')
+        flash(f'Erro ao adicionar pagamento: {e}. Verifique os dados.', 'danger')
         conn.close()
 
     return redirect(url_for('payments'))
