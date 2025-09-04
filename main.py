@@ -66,7 +66,7 @@ def login():
                 return redirect(url_for('dashboard'))
         else:
             # DEBUG: O login falhou.
-            print(f"Login falhou para o usuário: {username}. Nome de usuário ou senha incorretos.")
+            print(f"Login falhou para o usuário: {username}. Nome de usuário ou senha incorretoss.")
             flash('Nome de usuário ou senha incorretos.', 'danger')
             return redirect(url_for('login'))
 
