@@ -96,6 +96,7 @@ def add_user():
 
     except Exception as e:
         conn.rollback()
+        print(f"Erro ao adicionar usuário: {e}")
         flash(f'Erro ao adicionar usuário: {e}', 'danger')
 
     return redirect(url_for('admin_panel'))
